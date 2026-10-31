@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CoC Builder Potion & Upgrade Reminder Calculator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        coc: {
+                            gold: '#FBBF24',
+                            goldDark: '#D97706',
+                            elixir: '#EC4899',
+                            darkElixir: '#8B5CF6',
+                            bgDark: '#0F172A',
+                            cardDark: '#1E293B',
+                            borderDark: '#334155',
+                            accentGreen: '#10B981',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts: Inter & Supercell-like display font look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0B0F19;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(251, 191, 36, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+        }
+        /* Custom scrollbar for clean aesthetic */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0F172A;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col justify-between p-3 sm:p-6">
+
+    <!-- Header / Navbar -->
+    <header class="max-w-4xl mx-auto w-full mb-6">
+        <div class="bg-coc-cardDark/90 backdrop-blur border border-coc-borderDark p-4 rounded-2xl shadow-xl flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 text-2xl">
+                    ⚡
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-amber-200 to-yellow-500">
+                        Clash Potion Calculator
+                    </h1>
+                    <p class="text-xs text-slate-400">Plan upgrades & optimize Builder Potions</p>
+                </div>
+            </div>
+            <div class="hidden sm:block">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <i class="fa-solid font-bolt mr-1 text-emerald-400"></i> 10x Boost Active
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 flex-grow">
+        
+        <!-- Input Form Section (7 cols on lg) -->
+        <section class="lg:col-span-7 bg-coc-cardDark border border-coc-borderDark p-5 sm:p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-amber-400 mb-4 flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-2"></i> Upgrade Parameters
+                </h2>
+
+                <!-- Upgrade Duration Input -->
+                <div class="mb-5">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+                        Original Upgrade Duration
+                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <div class="relative">
+                                <input type="number" id="inputDays" min="0" value="3" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 px-4 text-white font-semibold focus:outline-none focus:border-amber-500 transition-colors pr-14" placeholder="0">
+                                <span class="absolute right-3 top-3 text-xs font-bold text-slate-500 uppercase">Days</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="relative">
+                                <input type="number" id="inputHours" min="0" max="23" value="18" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 px-4 text-white font-semibold focus:outline-none focus:border-amber-500 transition-colors pr-14" placeholder="0">
+                                <span class="absolute right-3 top-3 text-xs font-bold text-slate-500 uppercase">Hrs</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Current Time Section -->
+                <div class="mb-5">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                            Upgrade Start / Current Time
+                        </label>
+                        <button id="btnSetNow" type="button" class="text-xs text-amber-400 hover:text-amber-300 font-medium transition flex items-center">
+                            <i class="fa-solid fa-location-crosshairs mr-1"></i> Use Current Time
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-12 gap-2">
+                        <!-- HH:MM Time Input -->
+                        <div class="col-span-7 sm:col-span-8">
+                            <input type="time" id="inputTime" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 px-4 text-white font-semibold focus:outline-none focus:border-amber-500 transition-colors">
+                        </div>
+
+                        <!-- AM / PM Selector -->
+                        <div class="col-span-5 sm:col-span-4 flex rounded-xl bg-slate-900 p-1 border border-slate-700">
+                            <button type="button" id="btnAM" class="flex-1 rounded-lg text-xs font-bold py-2 transition-all bg-amber-500 text-slate-950 shadow">AM</button>
+                            <button type="button" id="btnPM" class="flex-1 rounded-lg text-xs font-bold py-2 transition-all text-slate-400 hover:text-white">PM</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Potion Mode Selector Switch -->
+                <div class="mb-6 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-sm font-semibold text-slate-200">Potion Strategy</span>
+                        <span id="potionModeLabel" class="text-xs px-2.5 py-1 rounded-full font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                            Continuous (Full Speed)
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="btnModeContinuous" class="py-2.5 px-3 rounded-lg text-xs font-bold border transition-all bg-amber-500/20 border-amber-500 text-amber-300">
+                            🚀 Continuous Potion
+                        </button>
+                        <button type="button" id="btnModeCustom" class="py-2.5 px-3 rounded-lg text-xs font-bold border transition-all bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200">
+                            🧪 Custom Potions
+                        </button>
+                    </div>
+
+                    <!-- Custom Potion Input (Hidden by default) -->
+                    <div id="customPotionContainer" class="mt-4 pt-3 border-t border-slate-800 hidden">
+                        <label class="block text-xs font-medium text-slate-400 mb-1.5">Number of Potions to Use:</label>
+                        <div class="relative max-w-xs">
+                            <input type="number" id="inputCustomPotions" min="1" value="2" class="w-full bg-slate-900 border border-slate-700 rounded-xl py-2 px-3 text-white font-semibold focus:outline-none focus:border-amber-500 transition-colors pr-20" placeholder="1">
+                            <span class="absolute right-3 top-2.5 text-xs text-slate-500">Potions</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="btnCalculate" class="w-full py-3.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-black text-sm uppercase tracking-wider rounded-xl shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 active:scale-[0.99] transition-all flex items-center justify-center">
+                <i class="fa-solid fa-calculator mr-2"></i> Calculate Finish Time
+            </button>
+        </section>
+
+        <!-- Results Output Section (5 cols on lg) -->
+        <section class="lg:col-span-5 bg-coc-cardDark border border-coc-borderDark p-5 sm:p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+            <div>
+                <h2 class="text-lg font-bold text-amber-400 mb-4 flex items-center">
+                    <i class="fa-solid fa-bullseye mr-2"></i> Upgrade Summary
+                </h2>
+
+                <!-- Main Finish Time Highlight Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-amber-500/30 p-5 rounded-xl mb-5 text-center relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 text-slate-800/40 text-8xl pointer-events-none select-none font-black">
+                        ⏳
+                    </div>
+                    
+                    <span class="text-xs font-extrabold uppercase tracking-widest text-slate-400 block mb-1">
+                        🎯 Set Your Reminder For
+                    </span>
+                    <div id="outputFinishTime" class="text-2xl sm:text-3xl font-black text-amber-400 mb-1 tracking-tight">
+                        --:-- --
+                    </div>
+                    <div id="outputFinishDate" class="text-xs font-semibold text-slate-300">
+                        Calculate duration above
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-5">
+                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block mb-1">Real-World Duration</span>
+                        <span id="outputRealTime" class="text-base font-bold text-emerald-400">0 hrs</span>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block mb-1">Potions Needed</span>
+                        <span id="outputPotionsCount" class="text-base font-bold text-amber-400">0 Potions</span>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block mb-1">Time Saved</span>
+                        <span id="outputTimeSaved" class="text-base font-bold text-indigo-400">0 hrs</span>
+                    </div>
+
+                    <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+                        <span class="text-[11px] font-bold text-slate-400 uppercase block mb-1">Est. Trader Cost</span>
+                        <span id="outputGemCost" class="text-base font-bold text-cyan-400">0 Gems</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copy Reminder Action -->
+            <div class="space-y-3">
+                <button type="button" id="btnCopyReminder" class="w-full py-3 bg-slate-800 hover:bg-slate-750 border border-slate-700 hover:border-amber-500/50 text-slate-200 font-bold text-xs uppercase tracking-wider rounded-xl transition-all flex items-center justify-center space-x-2 group">
+                    <i class="fa-regular fa-copy text-amber-400 group-hover:scale-110 transition-transform"></i>
+                    <span id="copyBtnText">Copy Reminder For Clan</span>
+                </button>
+                
+                <div id="toastMessage" class="hidden text-center text-xs text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 py-2 rounded-lg">
+                    ✓ Reminder copied to clipboard!
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-4xl mx-auto w-full text-center py-4 border-t border-slate-800 text-xs text-slate-500">
+        Clash of Clans Potion Calculator • Works for Builder Base & Home Village • 1 Potion = 10x Speed for 1 hr (Saves 9 hrs per builder)
+    </footer>
+
+    <!-- Logic Script -->
+    <script>
+        // State Variables
+        let currentAmPm = 'PM';
+        let potionStrategy = 'continuous'; // 'continuous' or 'custom'
+
+        // DOM Elements
+        const inputDays = document.getElementById('inputDays');
+        const inputHours = document.getElementById('inputHours');
+        const inputTime = document.getElementById('inputTime');
+        const btnAM = document.getElementById('btnAM');
+        const btnPM = document.getElementById('btnPM');
+        const btnSetNow = document.getElementById('btnSetNow');
+        
+        const btnModeContinuous = document.getElementById('btnModeContinuous');
+        const btnModeCustom = document.getElementById('btnModeCustom');
+        const customPotionContainer = document.getElementById('customPotionContainer');
+        const inputCustomPotions = document.getElementById('inputCustomPotions');
+        const potionModeLabel = document.getElementById('potionModeLabel');
+
+        const btnCalculate = document.getElementById('btnCalculate');
+        const outputFinishTime = document.getElementById('outputFinishTime');
+        const outputFinishDate = document.getElementById('outputFinishDate');
+        const outputRealTime = document.getElementById('outputRealTime');
+        const outputPotionsCount = document.getElementById('outputPotionsCount');
+        const outputTimeSaved = document.getElementById('outputTimeSaved');
+        const outputGemCost = document.getElementById('outputGemCost');
+        
+        const btnCopyReminder = document.getElementById('btnCopyReminder');
+        const copyBtnText = document.getElementById('copyBtnText');
+        const toastMessage = document.getElementById('toastMessage');
+
+        let lastCalculatedData = null;
+
+        // Initialize defaults
+        window.addEventListener('DOMContentLoaded', () => {
+            setCurrentTimeInInput();
+            calculateUpgrade();
+        });
+
+        // Set system time into inputs
+        function setCurrentTimeInInput() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            if (hours >= 12) {
+                setAmPm('PM');
+                if (hours > 12) hours -= 12;
+            } else {
+                setAmPm('AM');
+                if (hours === 0) hours = 12;
+            }
+            
+            const hoursFormatted = String(hours).padStart(2, '0');
+            inputTime.value = `${hoursFormatted}:${minutes}`;
+        }
+
+        // Toggle AM/PM
+        function setAmPm(mode) {
+            currentAmPm = mode;
+            if (mode === 'AM') {
+                btnAM.className = 'flex-1 rounded-lg text-xs font-bold py-2 transition-all bg-amber-500 text-slate-950 shadow';
+                btnPM.className = 'flex-1 rounded-lg text-xs font-bold py-2 transition-all text-slate-400 hover:text-white';
+            } else {
+                btnPM.className = 'flex-1 rounded-lg text-xs font-bold py-2 transition-all bg-amber-500 text-slate-950 shadow';
+                btnAM.className = 'flex-1 rounded-lg text-xs font-bold py-2 transition-all text-slate-400 hover:text-white';
+            }
+        }
+
+        btnAM.addEventListener('click', () => setAmPm('AM'));
+        btnPM.addEventListener('click', () => setAmPm('PM'));
+        btnSetNow.addEventListener('click', () => {
+            setCurrentTimeInInput();
+            calculateUpgrade();
+        });
+
+        // Toggle Potion Modes
+        btnModeContinuous.addEventListener('click', () => {
+            potionStrategy = 'continuous';
+            potionModeLabel.textContent = 'Continuous (Full Speed)';
+            btnModeContinuous.className = 'py-2.5 px-3 rounded-lg text-xs font-bold border transition-all bg-amber-500/20 border-amber-500 text-amber-300';
+            btnModeCustom.className = 'py-2.5 px-3 rounded-lg text-xs font-bold border transition-all bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200';
+            customPotionContainer.classList.add('hidden');
+            calculateUpgrade();
+        });
+
+        btnModeCustom.addEventListener('click', () => {
+            potionStrategy = 'custom';
+            potionModeLabel.textContent = 'Fixed Number of Potions';
+            btnModeCustom.className = 'py-2.5 px-3 rounded-lg text-xs font-bold border transition-all bg-amber-500/20 border-amber-500 text-amber-300';
+            btnModeContinuous.className = 'py-2.5 px-3 rounded-lg text-xs font-bold border transition-all bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200';
+            customPotionContainer.classList.remove('hidden');
+            calculateUpgrade();
+        });
+
+        // Main Calculation Engine
+        function calculateUpgrade() {
+            const days = parseInt(inputDays.value) || 0;
+            const hours = parseInt(inputHours.value) || 0;
+            const totalOriginalHours = (days * 24) + hours;
+
+            if (totalOriginalHours <= 0) {
+                outputFinishTime.textContent = "00:00 AM";
+                outputFinishDate.textContent = "Please enter upgrade duration";
+                return;
+            }
+
+            let timeValue = inputTime.value || "12:00";
+            let [h, m] = timeValue.split(':').map(Number);
+            if (isNaN(h)) h = 12;
+            if (isNaN(m)) m = 0;
+
+            // Convert to 24 hour clock for Date calculations
+            let hours24 = h;
+            if (currentAmPm === 'PM' && h < 12) hours24 += 12;
+            if (currentAmPm === 'AM' && h === 12) hours24 = 0;
+
+            const now = new Date();
+            const startDateTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours24, m, 0);
+
+            let realWorldHoursNeeded = 0;
+            let potionsUsed = 0;
+            let totalSavedHours = 0;
+
+            if (potionStrategy === 'continuous') {
+                // 1 real hour boosts 10 hours of progress
+                realWorldHoursNeeded = totalOriginalHours / 10.0;
+                potionsUsed = Math.ceil(realWorldHoursNeeded);
+                totalSavedHours = totalOriginalHours - realWorldHoursNeeded;
+            } else {
+                // Custom potion count
+                const requestedPotions = parseInt(inputCustomPotions.value) || 0;
+                // Maximum potions needed to instant-finish upgrade boost portion
+                const maxPotionsNeeded = Math.ceil(totalOriginalHours / 10.0);
+                potionsUsed = Math.min(requestedPotions, maxPotionsNeeded);
+
+                // Each potion boosts 10 hours in 1 hour (saves 9 hrs)
+                const boostedOriginalTimeProgress = potionsUsed * 10;
+                
+                if (boostedOriginalTimeProgress >= totalOriginalHours) {
+                    // Upgrade finishes within potion boost period
+                    realWorldHoursNeeded = totalOriginalHours / 10.0;
+                } else {
+                    // Potions run out, remaining time runs at normal speed (1x)
+                    const remainingOriginalHours = totalOriginalHours - boostedOriginalTimeProgress;
+                    realWorldHoursNeeded = potionsUsed + remainingOriginalHours;
+                }
+                totalSavedHours = totalOriginalHours - realWorldHoursNeeded;
+            }
+
+            // Calculate exact finish date
+            const finishDateTime = new Date(startDateTime.getTime() + (realWorldHoursNeeded * 60 * 60 * 1000));
+
+            // Format Outputs
+            const finishTimeString = finishDateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+            const finishDateString = finishDateTime.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+            // Update UI
+            outputFinishTime.textContent = finishTimeString;
+            outputFinishDate.textContent = finishDateString;
+            
+            // Format Real World Time (Hours & Minutes)
+            const realHoursInt = Math.floor(realWorldHoursNeeded);
+            const realMinutesInt = Math.round((realWorldHoursNeeded - realHoursInt) * 60);
+            outputRealTime.textContent = `${realHoursInt}h ${realMinutesInt}m`;
+
+            outputPotionsCount.textContent = `${potionsUsed} Potion${potionsUsed !== 1 ? 's' : ''}`;
+            
+            const savedHoursInt = Math.floor(totalSavedHours);
+            const savedMinutesInt = Math.round((totalSavedHours - savedHoursInt) * 60);
+            outputTimeSaved.textContent = `${savedHoursInt}h ${savedMinutesInt}m`;
+
+            // Trader cost: 280 gems per builder potion in trader shop
+            outputGemCost.textContent = `${potionsUsed * 280} Gems`;
+
+            // Save state for copy button
+            lastCalculatedData = {
+                originalDays: days,
+                originalHours: hours,
+                finishTime: finishTimeString,
+                finishDate: finishDateString,
+                potionsUsed: potionsUsed,
+                realHours: realHoursInt,
+                realMinutes: realMinutesInt
+            };
+        }
+
+        // Add Input Event Listeners
+        inputDays.addEventListener('input', calculateUpgrade);
+        inputHours.addEventListener('input', calculateUpgrade);
+        inputTime.addEventListener('input', calculateUpgrade);
+        inputCustomPotions.addEventListener('input', calculateUpgrade);
+        btnCalculate.addEventListener('click', calculateUpgrade);
+
+        // Copy Reminder Feature
+        btnCopyReminder.addEventListener('click', () => {
+            if (!lastCalculatedData) return;
+
+            const textToCopy = `🛡️ Clash of Clans Upgrade Reminder 🛡️\n` +
+                `⏳ Upgrade: ${lastCalculatedData.originalDays}d ${lastCalculatedData.originalHours}h\n` +
+                `🧪 Potions Used: ${lastCalculatedData.potionsUsed}\n` +
+                `⚡ Real Time Needed: ${lastCalculatedData.realHours}h ${lastCalculatedData.realMinutes}m\n` +
+                `🎯 Finish Time: ${lastCalculatedData.finishTime} on ${lastCalculatedData.finishDate}`;
+
+            // Robust Clipboard Copying
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(textToCopy).then(showToast).catch(fallbackCopy);
+            } else {
+                fallbackCopy();
+            }
+
+            function fallbackCopy() {
+                const textarea = document.createElement('textarea');
+                textarea.value = textToCopy;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast();
+                } catch (err) {
+                    console.error('Copy failed', err);
+                }
+                document.body.removeChild(textarea);
+            }
+
+            function showToast() {
+                toastMessage.classList.remove('hidden');
+                copyBtnText.textContent = "Copied!";
+                setTimeout(() => {
+                    toastMessage.classList.add('hidden');
+                    copyBtnText.textContent = "Copy Reminder For Clan";
+                }, 2500);
+            }
+        });
+    </script>
+</body>
+</html>
